@@ -18,48 +18,48 @@ import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @ComponentScan(basePackages = {
-        "org.galapagos.service",
-        "org.galapagos.controller"
+		"org.galapagos.service", 
+		"org.galapagos.controller"
 })
-@MapperScan(basePackages = {"org.galapagos.mapper"})
+@MapperScan(basePackages  = {"org.galapagos.mapper"})
 @EnableTransactionManagement
 public class RootConfig {
-
-    @Autowired
-    ApplicationContext applicationContext;
-
-    @Bean
-    public DataSource dataSource() {
-        HikariConfig config = new HikariConfig();
+	
+	@Autowired
+	ApplicationContext applicationContext;
+	
+	@Bean
+	public DataSource dataSource() {
+		HikariConfig config = new HikariConfig();
 //		config.setDriverClassName("com.mysql.cj.jdbc.Driver");
 //		config.setJdbcUrl("jdbc:mysql://localhost:3306/glory_db");
+		
+		config.setDriverClassName("net.sf.log4jdbc.sql.jdbcapi.DriverSpy");
+		config.setJdbcUrl("jdbc:log4jdbc:mysql://localhost:3306/glory_db");
+		config.setUsername("glory");
+		config.setPassword("1234");
+		
+		HikariDataSource dataSource = new HikariDataSource(config);
+		return dataSource;
+	}
+	
+	@Bean
+	public SqlSessionFactory sqlSessionFactory() throws Exception {
+		SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
+		
 
-        config.setDriverClassName("net.sf.log4jdbc.sql.jdbcapi.DriverSpy");
-        config.setJdbcUrl("jdbc:log4jdbc:mysql://localhost:3306/glory_db");
-        config.setUsername("glory");
-        config.setPassword("1234");
-
-        HikariDataSource dataSource = new HikariDataSource(config);
-        return dataSource;
-    }
-
-    @Bean
-    public SqlSessionFactory sqlSessionFactory() throws Exception {
-        SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
-
-
-        sqlSessionFactory.setConfigLocation(
-                applicationContext.getResource(
-                        "classpath:/mybatis-config.xml"));
-
-        sqlSessionFactory.setDataSource(dataSource());
-        return (SqlSessionFactory) sqlSessionFactory.getObject();
-    }
-
-    @Bean
-    public DataSourceTransactionManager transactionManager() {
-        DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource());
-        return manager;
-    }
+		sqlSessionFactory.setConfigLocation(
+	        applicationContext.getResource(
+	             "classpath:/mybatis-config.xml"));		
+		
+		sqlSessionFactory.setDataSource(dataSource());
+		return (SqlSessionFactory) sqlSessionFactory.getObject();
+	}
+	
+	@Bean
+	public DataSourceTransactionManager transactionManager(){
+	    DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource());
+	    return manager;
+	}
 
 }

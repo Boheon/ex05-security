@@ -8,6 +8,7 @@
 	<select  id="readAll" resultType="CommentVO">		
 		select *  from tbl_comment 
 		where bno = #{bno} 
+		order by no desc
 	</select>
 	
 	<select  id="get" resultType="CommentVO">

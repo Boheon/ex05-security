@@ -3,23 +3,46 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 
 <%@include file="../layouts/header.jsp"%>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 <script src="/resources/js/rest.js"></script>
-<script>
-$(document).ready(async function() {
+<script src="/resources/js/comment.js"></script>
 
+<script>
+// 댓글 기본 URL 상수 - 전역 상수
+const COMMENT_URL = '/api/board/${param.bno}/comment/';
+
+$(document).ready(async function() {
 	$('.remove').click(function(){
 		if(!confirm('정말 삭제할까요?')) return;		
 		document.forms.removeForm.submit();
 	});	
 	
-	const bno = ${board.bno};
-	const url = '/api/board/' + bno + '/comment';
-	console.log(url);
+	let bno = ${param.bno};		// 글번호
+	let writer = '${username}';	// 작성자(로그인 유저)
 
-	let data = await rest_get(url);
-	console.log(data);
+	loadComments(bno, writer);	// 댓글 목록 불러오기
+	// 댓글 추가 버튼 처리
+	$('.comment-add-btn').click(function(e) {
+		createComment(bno, writer);		
+	});
 	
+	$('.comment-list').on('click', '.comment-update-show-btn', showUpdateComment );
+	
+	// 수정 확인 버튼 클릭
+	$('.comment-list').on('click', '.comment-update-btn', function (e){
+		const el = $(this).closest('.comment');
+		updateComment(el, writer);
+	});
+	
+
+	// 수정 취소 버튼 클릭
+	$('.comment-list').on('click', '.comment-update-cancel-btn', 
+							cancelCommentUpdate);
+	
+	// 삭제 버튼 클릭
+	$('.comment-list').on('click', '.comment-delete-btn', 
+							deleteComment);	
+
 }); 
 
 </script>
@@ -39,6 +62,34 @@ $(document).ready(async function() {
 <div>
 	${board.content}
 </div>
+
+
+<!-- 새 댓글 작성 -->
+<!-- 코멘트 추가 / 작성자가 아닌 경우에만 보여주기 -->
+<c:if test="${username != board.writer }">
+	<div class="bg-light p-2 rounded my-5">
+		<div>${username == null ? '댓글을 작성하려면 먼저 로그인하세요' : '댓글 작성' }</div>
+		<div>
+			<textarea class="form-control new-comment-content" rows="3"
+				${username == null ? 'disabled' : '' }></textarea>
+			<div class="text-right">			
+				<button class="btn btn-primary btn-sm my-2 comment-add-btn" 
+					${username == null ? 'disabled' : '' } >
+					<i class="fa-regular fa-comment"></i> 확인
+				</button>
+			</div>
+		</div>
+	</div>
+</c:if>
+
+
+
+<div class="my-5">
+	<i class="fa-regular fa-comments"></i> 댓글 목록
+	<hr>
+	<div class="comment-list"></div>
+</div>
+
 
 <div class="mt-4">
 	<a href="${cri.getLink('list')}" class="btn btn-primary list">
