@@ -1,3 +1,9 @@
+const replyAddable = `
+	<button class="btn btn-light btn-sm reply-add-show-btn">
+		<i class="fa-solid fa-pen-to-square"></i> 답글
+	</button>
+`;
+	 
 const commentUpdatable = `
 	<button class="btn btn-light btn-sm comment-update-show-btn">
 		<i class="fa-solid fa-pen-to-square"></i> 수정
@@ -23,13 +29,14 @@ function createCommentTemplate(comment, writer) {
 				</span>
 			</div>
 			<div  class="btn-group">
+				${writer && (writer != comment.writer) ? replyAddable : ''}
 				${writer && (writer == comment.writer) ? commentUpdatable : ''}                     		
 			</div>
 		</div>
 		<div class="comment-body">
 			<div class="comment-content">${comment.content}</div>
 		</div>
-		<div class="reply-list ms-5"></div>
+		<div class="reply-list ml-5"></div>
 	</div>
 	`;
 }
@@ -41,11 +48,38 @@ async function loadComments(bno, writer) {
 	comments = await rest_get(COMMENT_URL);
 
 	for(let comment of comments) {
-		const commentEl = createCommentTemplate(comment, writer);
-		$('.comment-list').append($(commentEl));
+		const commentEl = $(createCommentTemplate(comment, writer));
+		$('.comment-list').append(commentEl);
+		
+		let replyListEl = commentEl.find('.reply-list');
+		//  답글 목록 처리
+		for(let reply of comment.replyList) {
+ 			let replyEl = $(createReplyTemplate(reply, writer));
+			replyListEl.append(replyEl);
+		};
 	}
-	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 async function createComment(bno, writer) {
@@ -159,3 +193,16 @@ async function deleteComment(e) {
 	comment.remove();
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
