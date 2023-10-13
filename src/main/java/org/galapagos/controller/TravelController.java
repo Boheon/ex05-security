@@ -1,5 +1,6 @@
 package org.galapagos.controller;
 
+import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import org.galapagos.domain.PageDTO;
 import org.galapagos.domain.TravelVO;
 import org.galapagos.service.TravelService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -48,10 +50,11 @@ public class TravelController {
 	
 	@GetMapping("/list")
 	public void list(
-			@ModelAttribute("cri") Criteria cri, 
+			@ModelAttribute("cri") Criteria cri,
+			Principal principal,
 			Model model) {
 		int total = service.getTotal(cri);
-		model.addAttribute("list", service.getList(cri));
+		model.addAttribute("list", service.getList(cri, principal));
 		model.addAttribute("pageMaker", new PageDTO(cri, total));
 	}
 	
@@ -59,9 +62,10 @@ public class TravelController {
 	public void get(
 			@RequestParam("no") Long no,
 			@ModelAttribute("cri") Criteria cri,
+			Principal principal,
 			Model model) {
 
-		model.addAttribute("travel", service.get(no));
+		model.addAttribute("travel", service.get(no, principal));
 	}
 	
 

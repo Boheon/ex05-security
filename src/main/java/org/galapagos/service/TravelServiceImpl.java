@@ -1,5 +1,6 @@
 package org.galapagos.service;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.galapagos.domain.Criteria;
@@ -24,15 +25,26 @@ public class TravelServiceImpl implements TravelService {
 	}
 
 	@Override
-	public List<TravelVO> getList(Criteria cri) {
-		return mapper.getList(cri);
+	public List<TravelVO> getList(Criteria cri, Principal principal) {
+		List<TravelVO>  list = mapper.getList(cri);
+		if(principal != null) {
+			List<Long> hearts = mapper.getHeartsList(principal.getName());
+			for(TravelVO travel: list) {
+				travel.setMyHeart(hearts.contains(travel.getNo()));
+			}
+		}
+				
+		return list;
 	}
 
 	@Override
-	public TravelVO get(Long no) {
-		// 조회수 처리 
-		
-		return mapper.read(no);
+	public TravelVO get(Long no, Principal principal) {
+		TravelVO travel = mapper.read(no);
+		if(principal != null) {
+			List<Long> hearts = mapper.getHeartsList(principal.getName());
+			travel.setMyHeart(hearts.contains(travel.getNo()));
+		}
+		return travel;
 	}
 
 	@Override
@@ -50,6 +62,11 @@ public class TravelServiceImpl implements TravelService {
 	@Override
 	public boolean remove(Long no) {
 		return mapper.delete(no) == 1;
+	}
+
+	@Override
+	public List<TravelVO> getRandom(int count) {
+		return mapper.getRandom(count);
 	}
 
 }
