@@ -4,7 +4,9 @@
 
 <%@ include file="../layouts/header.jsp" %>
 
+<h1><i class="fa-solid fa-plane-departure"></i> 100대 관광지</h1>
 
+<%@ include file="../common/search_bar.jsp" %>
 
 <c:if test="${not empty username}">
 <style>
@@ -94,13 +96,6 @@ $(document).ready(function() {
 	object-fit: cover;	
 }
 </style>
-
-
-
-<h1><i class="fa-solid fa-plane-departure my-5"></i> 100대 관광지</h1>
-
-<%@ include file="../common/search_bar.jsp" %>
-
 <div class="row">
 	<c:forEach var="travel" items="${list}">
 		<div class="col-sm-6 col-lg-4 mb-3">

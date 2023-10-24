@@ -42,58 +42,6 @@
 </style>
 
 
-<c:if test="${not empty username}">
-<style>
-	.fa-heart {
-		cursor: pointer;
-	}
-</style>
-
-<script src="/resources/js/rest.js"></script>
-<script>
-$(document).ready(function() {
-	let username = '${username}';
-	
-	const BASE_URL = '/api/travel/heart';
-	
-	// 좋아요 추가	
-	$('span.heart').on('click', '.fa-heart.fa-regular', async function(e){
-		
-		let tno = parseInt($(this).data("tno"));
-		let heart = { tno, username };
-		console.log(heart);	
-		
-		await rest_create(BASE_URL + "/add", heart);
-		
-		let heartCount = $(this).parent().find(".heart-count");
-		console.log(heartCount);
-		let count = parseInt(heartCount.text());
-		heartCount.text(count+1);
-		
-		$(this)
-			.removeClass('fa-regular')
-			.addClass('fa-solid');
-	});
-	
-	// 좋아요 제거
-	$('span.heart').on('click', '.fa-heart.fa-solid', async function(e){
-		let tno = parseInt($(this).data("tno"));
-
-		await rest_delete(`\${BASE_URL}/delete?tno=\${tno}&username=\${username}`);
-		
-		let heartCount = $(this).parent().find(".heart-count");
-		console.log(heartCount);
-		let count = parseInt(heartCount.text());
-		heartCount.text(count-1);
-		
-		$(this)
-			.removeClass('fa-solid')
-			.addClass('fa-regular');
-	});
-});
-	
-</script>
-</c:if>
 
 <script>
 $(document).ready(function() {
@@ -125,12 +73,6 @@ $(document).ready(function() {
 		
 	</div>
 	<div>
-
-		<span class="heart mr-4"> 
-			<i class="${ travel.myHeart ? 'fa-solid' : 'fa-regular' } fa-heart text-danger"
-				data-tno="${travel.no}"></i> 
-			<span class="heart-count">${travel.hearts}</span>
-		</span> 
 		<i class="fa-solid fa-phone"></i> 연락처: ${travel.phone}
 	</div>
 </div>
@@ -157,6 +99,21 @@ $(document).ready(function() {
   		</a>
   	</c:forEach>
 </div>
+
+<div class="my-5">
+	<h4>주변 볼거리</h4>
+	
+	<c:forEach var="local" items="${travel.locals}">
+		<div>
+			${local.placeName} / ${local.roadAddressName } / ${local.phone}
+		</div>  		
+  	</c:forEach>
+	
+	 
+</div>
+
+
+
 
 <div class="mt-5">
 	<i class="fa-solid fa-map-location-dot"></i> 주소: ${travel.address}
@@ -193,6 +150,15 @@ $(document).ready(function() {
 <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e764090e30af4050163f115a68c2be4a&libraries=services"></script>
 <script>
 	let geocoder = new kakao.maps.services.Geocoder();
+	
+	let locals = [
+		<c:forEach var="local" items="${travel.locals}">
+			{ 
+				name: '${local.placeName}', 
+				coords: new kakao.maps.LatLng(${local.y}, ${local.x}) 
+			}, 
+	  	</c:forEach>		
+	];
 
 	let address ='${travel.address}'; 
 
@@ -207,15 +173,22 @@ $(document).ready(function() {
 		        level: 5 // 지도의 확대 레벨
 		    };
 			
-			let map = new kakao.maps.Map(mapContainer, mapOption); 			
+			let map = new kakao.maps.Map(mapContainer, mapOption);
 			
-			let marker = new kakao.maps.Marker({
+/* 			let marker = new kakao.maps.Marker({
 				map: map,
 				position: coords
 			});
-
+ */
+			for(let local of locals) {
+				let marker = new kakao.maps.Marker({
+					map: map,
+					position: local.coords
+				});			
+			}		
+			
 			// 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
-			// map.setCenter(coords);
+			map.setCenter(coords);
 		} else {
 			alert('잘못된 주소입니다.');
 		}

@@ -1,10 +1,13 @@
 package org.galapagos.controller;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.galapagos.domain.BoardAttachmentVO;
 import org.galapagos.domain.BoardVO;
 import org.galapagos.domain.Criteria;
 import org.galapagos.domain.PageDTO;
@@ -13,11 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.extern.log4j.Log4j;
@@ -61,20 +68,18 @@ public class BoardController {
 	@PostMapping("/register")
 	public String register(
 			@Valid @ModelAttribute("board") BoardVO board,
-			Errors errors, RedirectAttributes rttr) {
+			Errors errors,
+			List<MultipartFile> files,
+			RedirectAttributes rttr)  throws Exception{
 
-		log.info("register: " + board);
 		if(errors.hasErrors()) {
 			return "board/register";
 		}
 
-		service.register(board);
-
+		service.register(board, files);
 		rttr.addFlashAttribute("result", board.getBno());
 
 		return "redirect:/board/list";
-		
-
 	}
 	
 	@GetMapping({ "/get", "/modify" })
@@ -91,8 +96,9 @@ public class BoardController {
 	public String modify(
 			@Valid @ModelAttribute("board") BoardVO board,
 			Errors errors,
+			List<MultipartFile> files,			
 			@ModelAttribute("cri") Criteria cri,
-			RedirectAttributes rttr) {
+			RedirectAttributes rttr)  throws Exception{
 		log.info("modify:" + board);
 	
 		if(errors.hasErrors()) {
@@ -100,7 +106,7 @@ public class BoardController {
 		}		
 		
 		
-		if (service.modify(board)) {
+		if (service.modify(board, files)) {
 			// Flash --> 1회성
 			rttr.addFlashAttribute("result", "success");
 //			rttr.addAttribute("bno", board.getBno());
@@ -135,5 +141,25 @@ public class BoardController {
 		return "redirect:/board/list" + cri.getLink();
 
 	}
+	
+	@GetMapping("/download/{no}")
+	@ResponseBody	// view를 사용하지 않고, 직접 내보냄
+	public void download(
+			@PathVariable("no") Long no, 
+			HttpServletResponse response) throws Exception {
 
+		BoardAttachmentVO attach = service.getAttachment(no);
+		attach.download(response);		
+		
+	}
+
+	
+	@DeleteMapping("/remove/attach/{no}")
+	@ResponseBody	
+	public String removeAttach(
+			@PathVariable("no") Long no) throws Exception {
+
+		service.removeAttachment(no);
+		return "OK";
+	}
 }

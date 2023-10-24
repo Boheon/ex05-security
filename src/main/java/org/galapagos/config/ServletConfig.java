@@ -44,8 +44,12 @@ public class ServletConfig implements WebMvcConfigurer {
 	public CommonsMultipartResolver getResolver()  throws IOException {
 		CommonsMultipartResolver resolver = new CommonsMultipartResolver();
 		
-		resolver.setMaxUploadSize(1024*1024*40); // 40MB, -1 : 무제한
-		resolver.setMaxUploadSizePerFile(1024*1024*20); // 20MB, -1: 무제한
+//		resolver.setMaxUploadSize(1024*1024*40); // 40MB, -1 : 무제한
+//		resolver.setMaxUploadSizePerFile(1024*1024*20); // 20MB, -1: 무제한
+		
+		resolver.setMaxUploadSize(-1); // -1 : 무제한
+		resolver.setMaxUploadSizePerFile(-1); //-1: 무제한		
+		
 		resolver.setMaxInMemorySize(1024*1024); // 1MB
 		
 		resolver.setUploadTempDir(new FileSystemResource("c:\\upload\\tmp")); 

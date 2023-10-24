@@ -14,7 +14,7 @@ async function rest_create(url, data) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return await res.json();	// 내부에서 JSON.parse();
+    return await res.json();
   } catch(e) {
     console.log(e);
   }  
